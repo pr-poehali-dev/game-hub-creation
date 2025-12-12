@@ -8,6 +8,9 @@ import Icon from "@/components/ui/icon";
 import TicTacToe from "@/components/games/TicTacToe";
 import Game2048 from "@/components/games/Game2048";
 import Puzzle15 from "@/components/games/Puzzle15";
+import Chess from "@/components/games/Chess";
+import Sudoku from "@/components/games/Sudoku";
+import Go from "@/components/games/Go";
 import AchievementNotification from "@/components/AchievementNotification";
 import { loadAchievements, loadStats, getTotalPoints, getRarityColor, Achievement } from "@/lib/achievements";
 
@@ -273,6 +276,9 @@ const Index = () => {
                                 if (game.title === "Крестики-нолики") setActiveGame("tictactoe");
                                 else if (game.title === "2048") setActiveGame("2048");
                                 else if (game.title === "Пазлы") setActiveGame("puzzle15");
+                                else if (game.title === "Шахматы") setActiveGame("chess");
+                                else if (game.title === "Судоку") setActiveGame("sudoku");
+                                else if (game.title === "Го") setActiveGame("go");
                               }}
                             >
                               <Icon name="Play" size={16} className="mr-2" />
@@ -339,6 +345,9 @@ const Index = () => {
               {activeGame === "tictactoe" && "Крестики-нолики"}
               {activeGame === "2048" && "2048"}
               {activeGame === "puzzle15" && "Пазл 15"}
+              {activeGame === "chess" && "Шахматы"}
+              {activeGame === "sudoku" && "Судоку"}
+              {activeGame === "go" && "Го"}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
@@ -351,6 +360,9 @@ const Index = () => {
             {activeGame === "puzzle15" && (
               <Puzzle15 onAchievement={(achievements) => setAchievementQueue(achievements)} />
             )}
+            {activeGame === "chess" && <Chess />}
+            {activeGame === "sudoku" && <Sudoku />}
+            {activeGame === "go" && <Go />}
           </div>
         </DialogContent>
       </Dialog>
