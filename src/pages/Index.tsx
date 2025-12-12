@@ -3,10 +3,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Icon from "@/components/ui/icon";
+import TicTacToe from "@/components/games/TicTacToe";
+import Game2048 from "@/components/games/Game2048";
+import Puzzle15 from "@/components/games/Puzzle15";
 
 const Index = () => {
   const [activeNav, setActiveNav] = useState("home");
+  const [activeGame, setActiveGame] = useState<string | null>(null);
 
   const games = [
     {
@@ -207,7 +212,15 @@ const Index = () => {
                                 <span className="font-medium">{game.rating}</span>
                               </div>
                             </div>
-                            <Button className="w-full" variant="default">
+                            <Button 
+                              className="w-full" 
+                              variant="default"
+                              onClick={() => {
+                                if (game.title === "Крестики-нолики") setActiveGame("tictactoe");
+                                else if (game.title === "2048") setActiveGame("2048");
+                                else if (game.title === "Пазлы") setActiveGame("puzzle15");
+                              }}
+                            >
                               <Icon name="Play" size={16} className="mr-2" />
                               Играть
                             </Button>
@@ -264,6 +277,23 @@ const Index = () => {
       </nav>
 
       {renderContent()}
+
+      <Dialog open={activeGame !== null} onOpenChange={() => setActiveGame(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              {activeGame === "tictactoe" && "Крестики-нолики"}
+              {activeGame === "2048" && "2048"}
+              {activeGame === "puzzle15" && "Пазл 15"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {activeGame === "tictactoe" && <TicTacToe />}
+            {activeGame === "2048" && <Game2048 />}
+            {activeGame === "puzzle15" && <Puzzle15 />}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
