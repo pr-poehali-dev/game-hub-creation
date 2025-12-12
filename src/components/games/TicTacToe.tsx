@@ -2,10 +2,15 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { updateStats } from "@/lib/achievements";
 
 type Player = "X" | "O" | null;
 
-const TicTacToe = () => {
+interface TicTacToeProps {
+  onAchievement?: (achievements: any[]) => void;
+}
+
+const TicTacToe = ({ onAchievement }: TicTacToeProps) => {
   const [board, setBoard] = useState<Player[]>(Array(9).fill(null));
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [winner, setWinner] = useState<Player | "draw" | null>(null);
@@ -117,8 +122,22 @@ const TicTacToe = () => {
             setWinner(gameResult);
             if (gameResult === "O") {
               setScore((prev) => ({ ...prev, ai: prev.ai + 1 }));
+              const result = updateStats({ 
+                tictactoePlayed: 1, 
+                totalGamesPlayed: 1 
+              });
+              if (result.newAchievements.length > 0 && onAchievement) {
+                onAchievement(result.newAchievements);
+              }
             } else if (gameResult === "draw") {
               setScore((prev) => ({ ...prev, draws: prev.draws + 1 }));
+              const result = updateStats({ 
+                tictactoePlayed: 1, 
+                totalGamesPlayed: 1 
+              });
+              if (result.newAchievements.length > 0 && onAchievement) {
+                onAchievement(result.newAchievements);
+              }
             }
           }
           setIsPlayerTurn(true);
@@ -126,7 +145,7 @@ const TicTacToe = () => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isPlayerTurn, winner, board]);
+  }, [isPlayerTurn, winner, board, onAchievement]);
 
   const handleCellClick = (index: number) => {
     if (board[index] || winner || !isPlayerTurn) return;
@@ -140,8 +159,24 @@ const TicTacToe = () => {
       setWinner(gameResult);
       if (gameResult === "X") {
         setScore((prev) => ({ ...prev, player: prev.player + 1 }));
+        const result = updateStats({ 
+          tictactoeWins: 1, 
+          tictactoePlayed: 1, 
+          totalGamesPlayed: 1, 
+          totalWins: 1 
+        });
+        if (result.newAchievements.length > 0 && onAchievement) {
+          onAchievement(result.newAchievements);
+        }
       } else if (gameResult === "draw") {
         setScore((prev) => ({ ...prev, draws: prev.draws + 1 }));
+        const result = updateStats({ 
+          tictactoePlayed: 1, 
+          totalGamesPlayed: 1 
+        });
+        if (result.newAchievements.length > 0 && onAchievement) {
+          onAchievement(result.newAchievements);
+        }
       }
     } else {
       setIsPlayerTurn(false);

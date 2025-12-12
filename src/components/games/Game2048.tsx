@@ -2,10 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { updateStats } from "@/lib/achievements";
 
 type Board = number[][];
 
-const Game2048 = () => {
+interface Game2048Props {
+  onAchievement?: (achievements: any[]) => void;
+}
+
+const Game2048 = ({ onAchievement }: Game2048Props) => {
   const [board, setBoard] = useState<Board>([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -118,8 +123,25 @@ const Game2048 = () => {
           localStorage.setItem("2048-best", newScore.toString());
         }
 
+        const maxTile = Math.max(...newBoard.flat());
+        const result = updateStats({ 
+          game2048HighScore: maxTile > 0 ? maxTile : 0,
+          game2048Played: 0,
+          totalGamesPlayed: 0
+        });
+        if (result.newAchievements.length > 0 && onAchievement) {
+          onAchievement(result.newAchievements);
+        }
+
         if (checkGameOver(newBoard)) {
           setGameOver(true);
+          const finalResult = updateStats({ 
+            game2048Played: 1,
+            totalGamesPlayed: 1
+          });
+          if (finalResult.newAchievements.length > 0 && onAchievement) {
+            onAchievement(finalResult.newAchievements);
+          }
         }
       }
     },

@@ -8,10 +8,13 @@ import Icon from "@/components/ui/icon";
 import TicTacToe from "@/components/games/TicTacToe";
 import Game2048 from "@/components/games/Game2048";
 import Puzzle15 from "@/components/games/Puzzle15";
+import AchievementNotification from "@/components/AchievementNotification";
+import { loadAchievements, loadStats, getTotalPoints, getRarityColor, Achievement } from "@/lib/achievements";
 
 const Index = () => {
   const [activeNav, setActiveNav] = useState("home");
   const [activeGame, setActiveGame] = useState<string | null>(null);
+  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([]);
 
   const games = [
     {
@@ -102,6 +105,11 @@ const Index = () => {
   const renderContent = () => {
     switch (activeNav) {
       case "profile":
+        const stats = loadStats();
+        const achievements = loadAchievements();
+        const unlockedAchievements = achievements.filter((a) => a.unlocked);
+        const totalPoints = getTotalPoints();
+        
         return (
           <div className="container mx-auto px-4 py-8 max-w-6xl">
             <div className="grid gap-6 md:grid-cols-3">
@@ -112,24 +120,70 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Игрок #1337</h2>
-                    <Badge variant="secondary" className="mt-2">Мастер</Badge>
+                    <Badge variant="secondary" className="mt-2">Очков: {totalPoints}</Badge>
                   </div>
                 </div>
               </Card>
               <Card className="p-6 md:col-span-2">
-                <h3 className="text-xl font-bold mb-4">Достижения</h3>
+                <h3 className="text-xl font-bold mb-4">Статистика</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-secondary/50 p-4 rounded-lg">
-                    <div className="text-3xl font-bold text-primary">156</div>
+                    <div className="text-3xl font-bold text-primary">{stats.totalGamesPlayed}</div>
                     <div className="text-sm text-muted-foreground">Игр сыграно</div>
                   </div>
                   <div className="bg-secondary/50 p-4 rounded-lg">
-                    <div className="text-3xl font-bold text-primary">38</div>
+                    <div className="text-3xl font-bold text-primary">{unlockedAchievements.length}</div>
                     <div className="text-sm text-muted-foreground">Достижений</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="text-3xl font-bold text-primary">{stats.tictactoeWins}</div>
+                    <div className="text-sm text-muted-foreground">Побед в крестиках</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg">
+                    <div className="text-3xl font-bold text-primary">{stats.game2048HighScore}</div>
+                    <div className="text-sm text-muted-foreground">Рекорд 2048</div>
                   </div>
                 </div>
               </Card>
             </div>
+            
+            <Card className="p-6 mt-6">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Icon name="Award" size={24} />
+                Достижения ({unlockedAchievements.length}/{achievements.length})
+              </h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                {achievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                      achievement.unlocked
+                        ? "bg-primary/10 border border-primary/30"
+                        : "bg-secondary/30 opacity-50"
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      achievement.unlocked ? "bg-primary/20" : "bg-muted"
+                    }`}>
+                      <Icon
+                        name={achievement.unlocked ? achievement.icon : "Lock"}
+                        size={24}
+                        className={achievement.unlocked ? "text-primary" : "text-muted-foreground"}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold">{achievement.title}</div>
+                      <div className="text-sm text-muted-foreground">{achievement.description}</div>
+                    </div>
+                    {achievement.unlocked && (
+                      <Badge className={getRarityColor(achievement.rarity)}>
+                        {achievement.points}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
         );
       case "leaderboard":
@@ -288,12 +342,25 @@ const Index = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            {activeGame === "tictactoe" && <TicTacToe />}
-            {activeGame === "2048" && <Game2048 />}
-            {activeGame === "puzzle15" && <Puzzle15 />}
+            {activeGame === "tictactoe" && (
+              <TicTacToe onAchievement={(achievements) => setAchievementQueue(achievements)} />
+            )}
+            {activeGame === "2048" && (
+              <Game2048 onAchievement={(achievements) => setAchievementQueue(achievements)} />
+            )}
+            {activeGame === "puzzle15" && (
+              <Puzzle15 onAchievement={(achievements) => setAchievementQueue(achievements)} />
+            )}
           </div>
         </DialogContent>
       </Dialog>
+
+      {achievementQueue.length > 0 && (
+        <AchievementNotification
+          achievement={achievementQueue[0]}
+          onClose={() => setAchievementQueue((prev) => prev.slice(1))}
+        />
+      )}
     </div>
   );
 };

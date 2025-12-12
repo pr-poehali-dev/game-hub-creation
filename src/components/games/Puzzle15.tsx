@@ -2,8 +2,13 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
+import { updateStats, loadStats } from "@/lib/achievements";
 
-const Puzzle15 = () => {
+interface Puzzle15Props {
+  onAchievement?: (achievements: any[]) => void;
+}
+
+const Puzzle15 = ({ onAchievement }: Puzzle15Props) => {
   const [tiles, setTiles] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [time, setTime] = useState(0);
@@ -80,6 +85,19 @@ const Puzzle15 = () => {
       if (checkSolved(newTiles)) {
         setSolved(true);
         setIsRunning(false);
+        
+        const stats = loadStats();
+        const bestTime = stats.puzzle15BestTime === 0 || time < stats.puzzle15BestTime ? time : stats.puzzle15BestTime;
+        
+        const result = updateStats({ 
+          puzzle15Completed: 1,
+          puzzle15BestTime: bestTime,
+          totalGamesPlayed: 1,
+          totalWins: 1
+        });
+        if (result.newAchievements.length > 0 && onAchievement) {
+          onAchievement(result.newAchievements);
+        }
       }
     }
   };
